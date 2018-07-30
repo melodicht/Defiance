@@ -1,7 +1,6 @@
 import { Directive, HostListener } from '@angular/core';
 
 import { DropHeroIconService } from './drop-hero-icon.service';
-import { DrawImageService } from './draw-image.service';
 
 @Directive({
   selector: '[appDragEvent]'
@@ -9,8 +8,7 @@ import { DrawImageService } from './draw-image.service';
 export class DragEventDirective {
 
   constructor(
-    private _dropHeroIconService : DropHeroIconService,
-    private _drawImageSerivce : DrawImageService
+    private _dropHeroIconService : DropHeroIconService
   ) { }
 
   @HostListener('dragstart', ['$event'])

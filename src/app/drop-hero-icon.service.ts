@@ -9,10 +9,12 @@ export class DropHeroIconService {
 
   constructor() { }
 
+  // Identifies currently dragged hero icon
   dragHeroIntoCanvasById(id) {
     this.currentDraggedHero = id;
   }
 
+  // Returns currently dragged hero icon for drag-drop.directive
   getCurrentDraggedHero(): string {
     return this.currentDraggedHero;
   }

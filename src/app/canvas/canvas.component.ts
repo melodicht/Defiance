@@ -1,10 +1,6 @@
-import { Component, Input, ElementRef, OnInit, AfterContentInit, AfterViewInit, ViewChild } from '@angular/core';
-import { Observable } from '../../../node_modules/rxjs';
+import { Component, OnInit, AfterContentInit, AfterViewInit } from '@angular/core';
 import { fromEvent } from 'rxjs';
-import { switchMap, takeUntil, pairwise } from 'rxjs/operators';
-import { CanvasMouseCoordinatesService } from '../canvas-mouse-coordinates.service';
 
-import { MousePosition } from '../mouse-position';
 import { CanvasElementReferenceService } from '../canvas-element-reference.service';
 import { DrawImageService } from '../draw-image.service';
 import { HeroIconService } from '../hero-icon.service';
@@ -14,31 +10,22 @@ import { HeroIconService } from '../hero-icon.service';
   template: '<canvas #canvas appDragDrop></canvas>',
   styles: ['canvas { border: 1px solid #000; }'],
   providers: [ 
-    CanvasMouseCoordinatesService, 
     CanvasElementReferenceService,
     DrawImageService ]
 })
 export class CanvasComponent implements OnInit, AfterContentInit, AfterViewInit {
 
-  // defining canvas' width and height 
-
   constructor(
-    private _canvasMouseCoordinates : CanvasMouseCoordinatesService,
     private _canvasRef : CanvasElementReferenceService,
     private _drawImageService : DrawImageService,
     private _heroIconService : HeroIconService
   ) {}
 
   ngOnInit() {
-    // get context
 
     this._canvasRef.initialiseCanvasReferences();
 
-    this._canvasMouseCoordinates.initialise();
-    
-    this._canvasMouseCoordinates.canvasMouseCoordinates();
-
-    this._drawImageService.initialise();
+    this._drawImageService.initialise();//Won't be necessary once images can be chosen
   }
 
   ngAfterContentInit() {
@@ -49,15 +36,16 @@ export class CanvasComponent implements OnInit, AfterContentInit, AfterViewInit 
     
     setTimeout(() => {
       this._drawImageService.drawBackground(this._heroIconService.getHeroIconArray())
-    }, 1000);
+    }, 1000); //Won't be necessary once images can be chosen
 
-    this.mouseDownCoordinates();
+    this.moveHeroIcon();
   }
 
-  private mouseDownCoordinates() {
+  // Moves selected hero icon once the mouse is down
+  private moveHeroIcon() {
     fromEvent(this._canvasRef.getCanvasReference(), 'mousedown')
       .subscribe((res: MouseEvent) => {
-        this._drawImageService.drawHeroIcon();
+        this._drawImageService.moveHeroIcon();
       });
   } 
 
