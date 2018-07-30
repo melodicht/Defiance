@@ -4,6 +4,7 @@ import { fromEvent } from 'rxjs';
 import { CanvasElementReferenceService } from '../canvas-element-reference.service';
 import { DrawImageService } from '../draw-image.service';
 import { HeroIconService } from '../hero-icon.service';
+import { CanvasMouseCoordinatesService } from '../canvas-mouse-coordinates.service';
 
 @Component({
   selector: 'app-canvas',
@@ -18,7 +19,8 @@ export class CanvasComponent implements OnInit, AfterContentInit, AfterViewInit 
   constructor(
     private _canvasRef : CanvasElementReferenceService,
     private _drawImageService : DrawImageService,
-    private _heroIconService : HeroIconService
+    private _heroIconService : HeroIconService,
+    private _canvasMouseCoordinatesService : CanvasMouseCoordinatesService
   ) {}
 
   ngOnInit() {

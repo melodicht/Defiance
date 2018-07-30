@@ -3,7 +3,8 @@ import { Injectable } from '@angular/core';
 import { fromEvent } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-import { HeroIcon} from './hero-icon';
+import { HeroIcon } from './hero-icon';
+import { MousePosition } from './mouse-position';
 
 import { CanvasElementReferenceService } from './canvas-element-reference.service';
 import { CanvasMouseCoordinatesService } from './canvas-mouse-coordinates.service';
@@ -16,14 +17,17 @@ export class DrawImageService {
 
   backgroundImage = new Image();
 
+  private mousePosition : MousePosition;
+
   constructor(
     private _canvasRef : CanvasElementReferenceService,
-    private _canvasMouseCoordinates : CanvasMouseCoordinatesService,
+    private _canvasMouseCoordinatesService : CanvasMouseCoordinatesService,
     private _heroIconService : HeroIconService
   ) { }
 
   initialise() {
     this.backgroundImage.src = "https://lh6.googleusercontent.com/K3jTa6uWEJPNiYOdWHD0O2TULRv5vicsqeQvCgxS6K0zta5vI8P_onk6l0UyPy0yjvhoyd_okQuTgG-6OAWR=w1440-h826-rw";
+    this.getMouseCoordinates();
   }
 
   // Moves hero icon if it is already on the canvas
@@ -36,10 +40,10 @@ export class DrawImageService {
     heroIcons.forEach((image: HTMLImageElement, icon: HeroIcon) => {
 
       // Position verification
-      if (icon.xPosition <= this._canvasMouseCoordinates.mousePosition.x &&
-        this._canvasMouseCoordinates.mousePosition.x <= icon.xPosition + image.width &&
-        icon.yPosition <= this._canvasMouseCoordinates.mousePosition.y &&
-        this._canvasMouseCoordinates.mousePosition.y <= icon.yPosition + image.height) {
+      if (icon.xPosition <= this.mousePosition.x &&
+        this.mousePosition.x <= icon.xPosition + image.width &&
+        icon.yPosition <= this.mousePosition.y &&
+        this.mousePosition.y <= icon.yPosition + image.height) {
 
           // Prevents moving two icons simultaneously
           imageGrabbed++; //TEMPORARY FIX
@@ -85,11 +89,11 @@ export class DrawImageService {
       takeUntil(fromEvent(this._canvasRef.getCanvasReference(), 'mouseup')),
       takeUntil(fromEvent(this._canvasRef.getCanvasReference(), 'mouseleave'))
     )
-      .subscribe((res: MouseEvent) => {
-
+      .subscribe(() => {
+        
         // Updates icon's positions so that its center is exactly on the cursor
-        icon.xPosition = this._canvasMouseCoordinates.mousePosition.x - image.width/2;
-        icon.yPosition = this._canvasMouseCoordinates.mousePosition.y - image.height/2;
+        icon.xPosition = this.mousePosition.x - image.width/2;
+        icon.yPosition = this.mousePosition.y - image.height/2;
         this.updateCanvas(heroIcons,icon,image);
     });
   }
@@ -104,5 +108,12 @@ export class DrawImageService {
     this.drawBackground(heroIconArray);
     this._canvasRef.getCanvasContext().drawImage(heroIconImage, heroIconClass.xPosition, heroIconClass.yPosition);
 
+  }
+
+  private getMouseCoordinates() {
+    this._canvasMouseCoordinatesService.getMouseCoordinates()
+    .subscribe((mousePos: MousePosition) => {
+      this.mousePosition = mousePos;
+    });
   }
 }
