@@ -1,6 +1,7 @@
 import { Directive, HostListener } from '@angular/core';
 
 import { fromEvent, Subscription } from 'rxjs';
+import { map } from "rxjs/operators";
 
 import { HeroIcon } from './hero-icon';
 import { MousePosition } from './mouse-position';
@@ -33,7 +34,6 @@ export class DragDropDirective {
   allowDrop(ev: Event) {
 
     ev.preventDefault();
-    this.getMouseCoordinates();
   }
 
   // Allows for icon to be registered by canvas
@@ -60,24 +60,53 @@ export class DragDropDirective {
 
     let newIcon = new Image();
 
-    // Fills in hero icon information for both the class data and the image
-    newIcon.width = 112;
-    newIcon.height = 100;
-    heroIcon[0].xPosition = this.mousePosition.x;
-    heroIcon[0].yPosition = this.mousePosition.y;
-    newIcon.src = heroIcon[0].src;
+    this.heroSubscription = fromEvent(this._canvasRef.getCanvasReference(), 'mousemove')
+    .pipe(
+      map((res: MouseEvent) => {
+        const rect = this._canvasRef.getCanvasReference().getBoundingClientRect();
 
-    // Adds to the set of hero icons in the canvas
-    this._heroIconService.addToHeroIconArray(heroIcon[0], newIcon);
+        const MOUSEPOS: MousePosition = {
+          x: res.clientX - rect.left,
+          y: res.clientY - rect.top
+        };
 
-    // Draws hero icon onto the canvas
-    this._drawImageService.addHeroIconToCanvas(newIcon, heroIcon);  
+        return MOUSEPOS;
+      })
+    )
+    .subscribe((mousePos: MousePosition) => {
+      // Fills in hero icon information for both the class data and the image
+      newIcon.width = 112;
+      newIcon.height = 100;
+      heroIcon[0].xPosition = mousePos.x;
+      heroIcon[0].yPosition = mousePos.y;
+      newIcon.src = heroIcon[0].src;
+      newIcon.className = "image-cropper";
+
+      console.log(newIcon);
+
+      // Adds to the set of hero icons in the canvas
+      this._heroIconService.addToHeroIconArray(heroIcon[0], newIcon);
+
+      // Draws hero icon onto the canvas
+      this._drawImageService.addHeroIconToCanvas(newIcon, heroIcon[0]);  
+
+      // Prevents the icon from following the cursor after drop
+      this.deactive();
+    });
+
   }
 
+  // Unsubscribes from heroSubscription 
+  private deactive() {
+    this.heroSubscription.unsubscribe();
+  }
+  
+  // NEED TO FIX, CURRENTLY, MOUSEPOS WILL BECOME INNACCURATE WHEN IMAGE IS BEING DRAGGED
   private getMouseCoordinates() {
     this._canvasMouseCoordinatesService.getMouseCoordinates()
     .subscribe((mousePos: MousePosition) => {
       this.mousePosition = mousePos;
+      console.log(mousePos);
     });
   }
 

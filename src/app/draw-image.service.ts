@@ -26,7 +26,7 @@ export class DrawImageService {
   ) { }
 
   initialise() {
-    this.backgroundImage.src = "https://lh6.googleusercontent.com/K3jTa6uWEJPNiYOdWHD0O2TULRv5vicsqeQvCgxS6K0zta5vI8P_onk6l0UyPy0yjvhoyd_okQuTgG-6OAWR=w1440-h826-rw";
+    this.backgroundImage.src = "https://lh6.googleusercontent.com/WiYGbwNqZcvpI70JxfM8Z7K7PnQPML1NQZPS3_WPjPVHsI3eF6ZcoFEv0VleLECTG5KkpJZZottIFzGrkaCd=w1440-h826-rw";
     this.getMouseCoordinates();
   }
 
@@ -71,12 +71,14 @@ export class DrawImageService {
   
   // Draws what ever is behind the selected icon
   drawBackground(heroIconArray: Map<HeroIcon, HTMLImageElement>) { //MAKE PRIVATE ONCE CANVAS.COMPONENT DOES NOT NEED IT ANYMORE
+
     // Draws map
     this._canvasRef.getCanvasContext().drawImage(this.backgroundImage, 0, 0);
 
     //Draws non-selected icons
     heroIconArray.forEach((image,icon) => {
-      this._canvasRef.getCanvasContext().drawImage(image, icon.xPosition, icon.yPosition);
+      //this._canvasRef.getCanvasContext().drawImage(image, icon.xPosition, icon.yPosition);
+      this.clipHeroIcon(heroIconArray, icon, image, false);
     });
 
   }
@@ -105,9 +107,30 @@ export class DrawImageService {
     if (!this._canvasRef.getCanvasContext()) { return; } 
 
     // Draws background and selected icon
-    this.drawBackground(heroIconArray);
-    this._canvasRef.getCanvasContext().drawImage(heroIconImage, heroIconClass.xPosition, heroIconClass.yPosition);
+    this.clipHeroIcon(heroIconArray, heroIconClass, heroIconImage, true);
+    
+  }
 
+  private clipHeroIcon(heroIconArray: Map<HeroIcon, HTMLImageElement>, heroIconClass: HeroIcon, heroIconImage: HTMLImageElement, withUnselectedIcons: boolean) {
+    
+    this._canvasRef.getCanvasContext().save();
+    if (withUnselectedIcons) {
+
+      this.drawBackground(heroIconArray);
+    }
+
+    this._canvasRef.getCanvasContext().beginPath();
+    this._canvasRef.getCanvasContext().arc(heroIconClass.xPosition + heroIconImage.width/2, heroIconClass.yPosition + heroIconImage.height/2, 50, 0, 2 * Math.PI);
+    this._canvasRef.getCanvasContext().lineWidth = 10;
+    this._canvasRef.getCanvasContext().stroke(); //CAN BE USED FOR BORDERS
+    
+    this._canvasRef.getCanvasContext().clip();
+    
+    this._canvasRef.getCanvasContext().fillStyle = "white";
+    this._canvasRef.getCanvasContext().fillRect(0,0, 1000, 1000);
+    this._canvasRef.getCanvasContext().drawImage(heroIconImage, heroIconClass.xPosition, heroIconClass.yPosition);
+    
+    this._canvasRef.getCanvasContext().restore();
   }
 
   private getMouseCoordinates() {
