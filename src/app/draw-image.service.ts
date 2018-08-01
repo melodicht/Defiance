@@ -152,6 +152,11 @@ export class DrawImageService {
     }
   }
 
+  public removeLastStroke() {
+    this.drawSave.pop();
+    this.drawBackground(this._heroIconService.getHeroIconArray());
+  }
+
   // Adds icon image onto the canvas
   public addHeroIconToCanvas(image: HTMLImageElement, icon: HeroIcon) {
     

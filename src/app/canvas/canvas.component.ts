@@ -1,4 +1,5 @@
 import { Component, OnInit, AfterContentInit, AfterViewInit } from '@angular/core';
+
 import { fromEvent } from 'rxjs';
 
 import { CanvasElementReferenceService } from '../canvas-element-reference.service';
@@ -42,6 +43,7 @@ export class CanvasComponent implements OnInit, AfterContentInit, AfterViewInit 
 
     //this.moveHeroIcon();
     this.drawInk();
+    this.removeLastStroke();
   }
 
   // Moves selected hero icon once the mouse is down
@@ -54,6 +56,15 @@ export class CanvasComponent implements OnInit, AfterContentInit, AfterViewInit 
 
   private drawInk() {
     this._drawImageService.drawInk();
+  }
+
+  private removeLastStroke() {
+    fromEvent(document, 'keydown')
+    .subscribe((e: KeyboardEvent) => {
+      if ((e.key === "z" && e.ctrlKey === true) || (e.key === "z" && e.metaKey === true)) {
+        this._drawImageService.removeLastStroke();
+      }
+    })
   }
 
 }
