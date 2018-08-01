@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { fromEvent } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, switchMap, pairwise, finalize } from 'rxjs/operators';
 
 import { HeroIcon } from './hero-icon';
 import { MousePosition } from './mouse-position';
@@ -18,6 +18,10 @@ export class DrawImageService {
   backgroundImage = new Image();
 
   private mousePosition : MousePosition;
+
+  private pointPairs : Map<MousePosition, MousePosition>;
+  private lineSave: Map<MousePosition, MousePosition>[];
+  private drawSave: Map<MousePosition, MousePosition>[][];
 
   constructor(
     private _canvasRef : CanvasElementReferenceService,
@@ -61,6 +65,93 @@ export class DrawImageService {
 
     }
 
+  public drawInk() {
+
+    this.getMouseCoordinates();
+    
+    let ctx: CanvasRenderingContext2D = this._canvasRef.getCanvasContext();
+
+    ctx.lineWidth = 5;
+    ctx.lineJoin = ctx.lineCap = 'round';
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = 'rgb(0, 0, 0)';
+
+    fromEvent(this._canvasRef.getCanvasReference(), 'mousedown')
+    .pipe(
+      switchMap((e) => {
+        // Registers mouse movement until the user stops holding down or leaves the canvas
+        return fromEvent(this._canvasRef.getCanvasReference(), 'mousemove').pipe(
+          takeUntil(fromEvent(this._canvasRef.getCanvasReference(), 'mouseup')),
+          takeUntil(fromEvent(this._canvasRef.getCanvasReference(), 'mouseleave')),
+          finalize(() => {
+            
+            if (this.drawSave === undefined) {
+              this.drawSave = [];
+            }
+
+            this.lineSave.push(this.pointPairs);
+            this.drawSave.push(this.lineSave);
+            console.log(this.lineSave); 
+            console.log(this.drawSave); 
+            this.lineSave = [];
+            this.pointPairs = new Map();
+          }),
+          pairwise()
+        )
+      })
+    )
+    .subscribe((res: [MouseEvent, MouseEvent]) => {
+      const rect = this._canvasRef.getCanvasReference().getBoundingClientRect();
+
+      // previous and current position with the offset
+      const prevPos: MousePosition = {
+        x: res[0].clientX - rect.left,
+        y: res[0].clientY - rect.top
+      };
+
+      const currentPos: MousePosition = {
+        x: res[1].clientX - rect.left,
+        y: res[1].clientY - rect.top
+      };
+      if (this.pointPairs === undefined) {
+        this.pointPairs = new Map();
+      }
+
+      this.pointPairs.set(prevPos, currentPos);
+
+      if (this.lineSave === undefined) {
+        this.lineSave = [];
+      }
+    
+      // this method we'll implement soon to do the actual drawing
+      this.drawOnCanvas(prevPos, currentPos);
+    });
+  }
+
+  private drawOnCanvas(
+    prevPos: MousePosition,
+    currentPos: MousePosition
+  ) {
+
+    let ctx: CanvasRenderingContext2D = this._canvasRef.getCanvasContext();
+    // incase the context is not set
+    if (!ctx) { return; }
+  
+    // start our drawing path
+    ctx.beginPath();
+  
+    // we're drawing lines so we need a previous position
+    if (prevPos) {
+      // sets the start point
+      ctx.moveTo(prevPos.x, prevPos.y); // from
+      // draws a line from the start pos until the current position
+      ctx.lineTo(currentPos.x, currentPos.y);
+  
+      // strokes the current path with the styles we set earlier
+      ctx.stroke();
+    }
+  }
+
   // Adds icon image onto the canvas
   public addHeroIconToCanvas(image: HTMLImageElement, icon: HeroIcon) {
     
@@ -79,6 +170,17 @@ export class DrawImageService {
     heroIconArray.forEach((image,icon) => {
       //this._canvasRef.getCanvasContext().drawImage(image, icon.xPosition, icon.yPosition);
       this.clipHeroIcon(heroIconArray, icon, image, false);
+    });
+
+    this.drawSave.forEach((array) => {
+
+      array.forEach((stroke) => {
+
+        stroke.forEach((prevPos, currentPos) => {
+
+          this.drawOnCanvas(prevPos, currentPos);
+        });
+      });
     });
 
   }

@@ -40,7 +40,8 @@ export class CanvasComponent implements OnInit, AfterContentInit, AfterViewInit 
       this._drawImageService.drawBackground(this._heroIconService.getHeroIconArray())
     }, 1000); //Won't be necessary once images can be chosen
 
-    this.moveHeroIcon();
+    //this.moveHeroIcon();
+    this.drawInk();
   }
 
   // Moves selected hero icon once the mouse is down
@@ -50,5 +51,9 @@ export class CanvasComponent implements OnInit, AfterContentInit, AfterViewInit 
         this._drawImageService.moveHeroIcon();
       });
   } 
+
+  private drawInk() {
+    this._drawImageService.drawInk();
+  }
 
 }
