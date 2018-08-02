@@ -46,12 +46,12 @@
   }
   
   /*------ ADDED CSS ---------*/
-  .on
+  .move
   {
     display: none;
   }
   
-  .on, .off
+  .move, .draw
   {
     color: white;
     position: absolute;
@@ -62,10 +62,10 @@
     font-family: Verdana, sans-serif;
   }
   
-  input:checked+ .slider .on
+  input:checked+ .slider .move
   {display: block;}
   
-  input:checked + .slider .off
+  input:checked + .slider .draw
   {display: none;}
   
   /*--------- END --------*/

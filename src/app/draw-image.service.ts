@@ -30,7 +30,7 @@ export class DrawImageService {
   ) { }
 
   initialise() {
-    this.backgroundImage.src = "https://lh6.googleusercontent.com/WiYGbwNqZcvpI70JxfM8Z7K7PnQPML1NQZPS3_WPjPVHsI3eF6ZcoFEv0VleLECTG5KkpJZZottIFzGrkaCd=w1440-h826-rw";
+    this.backgroundImage.src = "https://lh5.googleusercontent.com/5qPAoW8Jynr0ggqVVH1_oTpt8sHmPkU4sEbWqgkCOYupAVNwW8vyqYujD3JWiuiI9qeG0RtkOHpQC2f1_Jyx=w1440-h826-rw";
     this.getMouseCoordinates();
   }
 

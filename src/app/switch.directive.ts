@@ -7,6 +7,6 @@ export class SwitchDirective {
 
   constructor() { }
 
-  @Input('appSwitch') isMove: boolean;
+  // this may not be necessary
 
 }

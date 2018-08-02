@@ -6,6 +6,7 @@ import { CanvasElementReferenceService } from '../canvas-element-reference.servi
 import { DrawImageService } from '../draw-image.service';
 import { HeroIconService } from '../hero-icon.service';
 import { CanvasMouseCoordinatesService } from '../canvas-mouse-coordinates.service';
+import { SwitchService } from '../switch.service';
 
 @Component({
   selector: 'app-canvas',
@@ -13,15 +14,22 @@ import { CanvasMouseCoordinatesService } from '../canvas-mouse-coordinates.servi
   styles: ['canvas { border: 1px solid #000; }'],
   providers: [ 
     CanvasElementReferenceService,
-    DrawImageService ]
+    DrawImageService,
+    HeroIconService,
+    CanvasMouseCoordinatesService,
+    SwitchService 
+  ]
 })
 export class CanvasComponent implements OnInit, AfterContentInit, AfterViewInit {
+
+  private isMove: boolean;
 
   constructor(
     private _canvasRef : CanvasElementReferenceService,
     private _drawImageService : DrawImageService,
     private _heroIconService : HeroIconService,
-    private _canvasMouseCoordinatesService : CanvasMouseCoordinatesService
+    private _canvasMouseCoordinatesService : CanvasMouseCoordinatesService,
+    private _switchService : SwitchService
   ) {}
 
   ngOnInit() {
@@ -29,6 +37,7 @@ export class CanvasComponent implements OnInit, AfterContentInit, AfterViewInit 
     this._canvasRef.initialiseCanvasReferences();
 
     this._drawImageService.initialise();//Won't be necessary once images can be chosen
+
   }
 
   ngAfterContentInit() {
@@ -41,9 +50,16 @@ export class CanvasComponent implements OnInit, AfterContentInit, AfterViewInit 
       this._drawImageService.drawBackground(this._heroIconService.getHeroIconArray())
     }, 1000); //Won't be necessary once images can be chosen
 
-    //this.moveHeroIcon();
-    this.drawInk();
-    this.removeLastStroke();
+    this.getSwitchMode();
+
+    if (this.isMove === true) {
+      this.moveHeroIcon();
+    }
+    else if (this.isMove === false) {
+      this.drawInk();
+      this.removeLastStroke();
+    }
+    
   }
 
   // Moves selected hero icon once the mouse is down
@@ -65,6 +81,15 @@ export class CanvasComponent implements OnInit, AfterContentInit, AfterViewInit 
         this._drawImageService.removeLastStroke();
       }
     })
+  }
+
+  private getSwitchMode(): void {
+    this._switchService.getSwitchMode()
+    .subscribe((bool: boolean) => {
+      this.isMove = bool;
+      console.log(this.isMove);
+    });
+    
   }
 
 }
