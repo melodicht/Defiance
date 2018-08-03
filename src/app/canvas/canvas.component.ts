@@ -51,23 +51,12 @@ export class CanvasComponent implements OnInit, AfterContentInit, AfterViewInit 
     }, 1000); //Won't be necessary once images can be chosen
 
     this.getSwitchMode();
-
-    if (this.isMove === true) {
-      this.moveHeroIcon();
-    }
-    else if (this.isMove === false) {
-      this.drawInk();
-      this.removeLastStroke();
-    }
     
   }
 
   // Moves selected hero icon once the mouse is down
   private moveHeroIcon() {
-    fromEvent(this._canvasRef.getCanvasReference(), 'mousedown')
-      .subscribe((res: MouseEvent) => {
-        this._drawImageService.moveHeroIcon();
-      });
+    this._drawImageService.moveHeroIcon();
   } 
 
   private drawInk() {
@@ -88,6 +77,16 @@ export class CanvasComponent implements OnInit, AfterContentInit, AfterViewInit 
     .subscribe((bool: boolean) => {
       this.isMove = bool;
       console.log(this.isMove);
+      if (this.isMove === true) {
+        this._drawImageService.unsubscribeDrawInk();
+        this.moveHeroIcon();
+      }
+      else if (this.isMove === false) {
+        this._drawImageService.unSubscribeMoveHeroIcon();
+        this.drawInk();
+        this.removeLastStroke();
+      }
+
     });
     
   }

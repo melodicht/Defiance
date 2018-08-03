@@ -20,17 +20,12 @@ export class SwitchComponent implements OnInit {
   constructor(private _switchService: SwitchService) { }
 
   ngOnInit() {
-    this.buttonClick();
+    this.initiateSwitch();
   }
 
-  private buttonClick() {
-    let button = document.querySelector("#togBtn");
-    fromEvent(button, 'click')
-    .subscribe(() => {
-      this.isMove = !this.isMove;
-      this._switchService.setSwitchMode(this.isMove);
-    });
- 
+  private initiateSwitch() {
+    this._switchService.setSwitchMode(this.isMove);
+
   }
 
 }
